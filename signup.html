@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+  <title>MediEye | Sign Up</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #3a0ca3, #7209b7, #4361ee);
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 25px;
+      left: 25px;
+      font-size: 22px;
+      color: white;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.3s;
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.35);
+      transform: scale(1.05);
+    }
+
+    .container {
+      display: flex;
+      width: 900px;
+      height: 520px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .form-section {
+      flex: 1;
+      background: #fff;
+      padding: 50px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .form-section h2 {
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .form-section input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+    }
+
+    /* Enhanced Button */
+    .btn {
+      display: inline-block;
+      padding: 12px;
+      margin-top: 15px;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      color: #fff !important;
+      cursor: pointer;
+      background: linear-gradient(to right, #4361ee, #7209b7);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(67, 97, 238, 0.3);
+      font-size: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(67, 97, 238, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 3px 5px rgba(67, 97, 238, 0.3);
+    }
+
+    .form-footer {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .form-footer a {
+      color: #4361ee;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .info-section {
+      flex: 1;
+      background: linear-gradient(to bottom right, #4361ee, #7209b7);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .info-section h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .password-rules {
+      font-size: 13px;
+      color: #555;
+      margin-top: 5px;
+    }
+
+    .password-rules span {
+      display: block;
+      margin: 3px 0;
+    }
+
+    .valid {
+      color: green;
+    }
+
+    .invalid {
+      color: red;
+    }
+
+    /* Loading Overlay */
+    #loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .loading-spinner {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      min-width: 200px;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #4361ee;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <button class="close-btn" id="closeBtn">✖</button>
+
+  <div class="container">
+    <div class="form-section">
+      <h2>Create Account</h2>
+      <form id="signupForm">
+        <input type="text" id="fullname" placeholder="Full Name" required />
+        <input type="text" id="userid" placeholder="Username" required />
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required />
+
+        <div class="password-rules" id="passwordRules" style="display: none;">
+          <span id="ruleLength" class="invalid">• At least 6 characters</span>
+          <span id="ruleUpper" class="invalid">• One uppercase letter (A-Z)</span>
+          <span id="ruleLower" class="invalid">• One lowercase letter (a-z)</span>
+          <span id="ruleNumber" class="invalid">• One number (0-9)</span>
+          <span id="ruleSpecial" class="invalid">• One special character (!@#$%^&*)</span>
+        </div>
+
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+        <button type="submit" class="btn">Sign Up</button>
+      </form>
+      <p class="form-footer">Already have an account? <a href="login.html">Login</a></p>
+    </div>
+
+    <div class="info-section">
+      <h2>Glad to see you!</h2>
+      <p>Join MediEye today and access smart healthcare tools for managing patients effectively.</p>
+      <button class="btn" onclick="window.location.href='login.html'">Sign In</button>
+    </div>
+  </div>
+
+  <div id="loading-overlay">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Creating your account...</p>
+    </div>
+  </div>
+
+  <script>
+    // Close button
+    document.getElementById("closeBtn").addEventListener("click", () => {
+      window.location.href = "index.html";
+    });
+
+    // Password validation UI
+    const password = document.getElementById("password");
+    const passwordRules = document.getElementById("passwordRules");
+    const rules = {
+      length: document.getElementById("ruleLength"),
+      upper: document.getElementById("ruleUpper"),
+      lower: document.getElementById("ruleLower"),
+      number: document.getElementById("ruleNumber"),
+      special: document.getElementById("ruleSpecial")
+    };
+
+    password.addEventListener("input", () => {
+      passwordRules.style.display = "block";
+      const val = password.value;
+      rules.length.className = val.length >= 6 ? "valid" : "invalid";
+      rules.upper.className = /[A-Z]/.test(val) ? "valid" : "invalid";
+      rules.lower.className = /[a-z]/.test(val) ? "valid" : "invalid";
+      rules.number.className = /\d/.test(val) ? "valid" : "invalid";
+      rules.special.className = /[!@#$%^&*]/.test(val) ? "valid" : "invalid";
+    });
+
+    password.addEventListener("blur", () => {
+      if (!password.value.trim()) passwordRules.style.display = "none";
+    });
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCd9uDRng_yMuMzqLhqrPs3Quht_lekbF0",
+      authDomain: "medieye-8d798.firebaseapp.com",
+      databaseURL: "https://medieye-8d798-default-rtdb.asia-southeast1.firebasedatabase.app/",
+      projectId: "medieye-8d798",
+      storageBucket: "medieye-8d798.firebasestorage.app",
+      messagingSenderId: "967976625417",
+      appId: "1:967976625417:web:00eed975b183e6d1e91fd8"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    // const auth = firebase.auth();
+    const database = firebase.database();
+
+    // Form submission
+    document.getElementById("signupForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const fullname = document.getElementById("fullname").value.trim();
+      const userid = document.getElementById("userid").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const pass = password.value.trim();
+      const confirm = document.getElementById("confirmPassword").value.trim();
+
+      // Validation
+      if (!fullname || !userid || !email || !pass || !confirm) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+      if (!emailPattern.test(email)) {
+        alert("Please enter a valid email.");
+        return;
+      }
+
+      const allValid = Object.values(rules).every(rule => rule.className === "valid");
+      if (!allValid) {
+        alert("Password does not meet all requirements.");
+        return;
+      }
+
+      if (pass !== confirm) {
+        alert("Passwords do not match!");
+        return;
+      }
+
+      // Show loading
+      document.getElementById("loading-overlay").style.display = "flex";
+
+      try {
+
+        // Save profile to Realtime Database (NO PASSWORD!)
+        await database.ref('users/' + userid).set({
+          name: fullname,
+          email: email,
+          cam: 0,
+          pass: pass
+        });
+
+        alert("Account created successfully!");
+        window.location.href = "login.html";
+
+      } catch (error) {
+        console.error("Signup error:", error);
+        let msg = "Failed to create account.";
+        if (error.code === "auth/email-already-in-use") {
+          msg = "This email is already registered.";
+        } else if (error.code === "auth/weak-password") {
+          msg = "Password is too weak. Use at least 6 characters.";
+        }
+        alert(msg);
+      } finally {
+        document.getElementById("loading-overlay").style.display = "none";
+      }
+    });
+  </script>
+</body>
+
+</html>

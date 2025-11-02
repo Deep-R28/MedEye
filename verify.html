@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify OTP</title>
+  <link rel="stylesheet" href="common.css">
+</head>
+
+<body>
+  <div class="container">
+    <h2>Verify OTP</h2>
+    <p>Enter the 6-digit code sent to your email.</p>
+
+    <div class="otp-inputs">
+      <input type="text" maxlength="1">
+      <input type="text" maxlength="1">
+      <input type="text" maxlength="1">
+      <input type="text" maxlength="1">
+      <input type="text" maxlength="1">
+      <input type="text" maxlength="1">
+    </div>
+
+    <button id="verifyBtn">Verify</button>
+    <div class="timer">
+      <span id="timer">02:00</span>
+    </div>
+    <button id="resendBtn" class="resend-btn" disabled>Resend Code</button>
+    <p id="status"></p>
+  </div>
+
+  <script>
+    const timerDisplay = document.getElementById("timer");
+    const resendBtn = document.getElementById("resendBtn");
+
+    let timeLeft = 120;
+    const timer = setInterval(() => {
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        resendBtn.disabled = false;
+        resendBtn.style.opacity = "1";
+        timerDisplay.innerText = "Expired!";
+      } else {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerDisplay.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        timeLeft--;
+      }
+    }, 1000);
+  </script>
+</body>
+
+</html>

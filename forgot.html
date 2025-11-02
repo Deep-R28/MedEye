@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forgot Password | MediEye</title>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="common.css">
+  <style>
+    /* Optional: Ensure only one form is visible at a time */
+    .container {
+      transition: opacity 0.3s;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Step 1: Email Input -->
+  <div class="container" id="email-section">
+    <h2>Forgot Password</h2>
+    <p>Enter your username to receive a 6-digit OTP.</p>
+    <form id="emailForm" onsubmit="sendOTP(event)">
+      <input type="text" id="userId" placeholder="Enter username" required>
+      <button type="submit">Send OTP</button>
+    </form>
+    <p id="email-status"></p>
+  </div>
+
+  <!-- Step 2: OTP Input -->
+  <div class="container" id="otp-section" style="display: none;">
+    <h2>Enter OTP</h2>
+    <p>Enter the 6-digit OTP sent to your email</p>
+    <form id="otpForm" onsubmit="verifyOTP(event)">
+      <input type="text" id="otp-input" placeholder="123456" maxlength="6" inputmode="numeric" pattern="[0-9]*" required
+        style="letter-spacing: 4px; text-align: center;">
+      <button type="submit">Verify OTP</button>
+    </form>
+    <p id="otp-status"></p>
+    <button type="button" onclick="goBack()"
+      style="margin-top: 10px; background: none; border: none; color: #007bff; cursor: pointer; text-decoration: underline;">
+      ← Back to email
+    </button>
+  </div>
+
+  <script>
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCd9uDRng_yMuMzqLhqrPs3Quht_lekbF0",
+      authDomain: "medieye-8d798.firebaseapp.com",
+      databaseURL: "https://medieye-8d798-default-rtdb.asia-southeast1.firebasedatabase.app/",
+      projectId: "medieye-8d798",
+      storageBucket: "medieye-8d798.firebasestorage.app",
+      messagingSenderId: "967976625417",
+      appId: "1:967976625417:web:00eed975b183e6d1e91fd8"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+
+    let userEmail = '';
+
+
+    let email = '';
+    async function sendOTP(event) {
+      event.preventDefault(); // ✅ Move this to the top
+
+      const userid = document.getElementById("userId").value.trim();
+      if (!userid) {
+        alert("Please enter your User ID");
+        return;
+      }
+
+      const statusEl = document.getElementById('email-status');
+      statusEl.textContent = 'Looking up user...';
+      statusEl.style.color = '#000';
+
+      try {
+        // ✅ Use await instead of .then()
+        const snapshot = await database.ref('users/' + userid).once('value');
+
+        if (!snapshot.exists()) {
+          alert("User doesn't exist.");
+          return;
+        }
+
+        const userData = snapshot.val();
+        const email = userData.email; // ✅ Now properly scoped
+
+        // Update status
+        statusEl.textContent = 'Sending OTP...';
+
+        // ✅ Now email is available here
+        const response = await fetch('http://localhost:3000/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          userEmail = email; // Save for OTP verification
+          statusEl.textContent = '';
+          // Switch to OTP section
+          document.getElementById('email-section').style.display = 'none';
+          document.getElementById('otp-section').style.display = 'block';
+        } else {
+          statusEl.textContent = result.error || 'Failed to send OTP';
+          statusEl.style.color = '#d32f2f';
+        }
+
+      } catch (error) {
+        console.error("Error:", error);
+        if (error.message?.includes("fetch")) {
+          statusEl.textContent = 'Failed to connect to server. Is it running?';
+        } else {
+          statusEl.textContent = 'An error occurred. Please try again.';
+        }
+        statusEl.style.color = '#d32f2f';
+      }
+    }
+    async function verifyOTP(event) {
+      event.preventDefault();
+      const otp = document.getElementById('otp-input').value.trim();
+
+      const statusEl = document.getElementById('otp-status');
+      statusEl.textContent = 'Verifying...';
+      statusEl.style.color = '#000';
+
+      if (!otp || otp.length !== 6 || !/^\d{6}$/.test(otp)) {
+        statusEl.textContent = 'Please enter a valid 6-digit OTP';
+        statusEl.style.color = '#d32f2f';
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:3000/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: userEmail, otp })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          statusEl.textContent = '✅ OTP verified! Redirecting...';
+          statusEl.style.color = '#2e7d32';
+          // Proceed to reset password page, etc.
+          setTimeout(() => {
+            const userid = document.getElementById("userId").value.trim();
+            window.location.href = `reset.html?userId=${userid}`
+          }, 1000);
+        } else {
+          statusEl.textContent = result.error || 'Invalid OTP';
+          statusEl.style.color = '#d32f2f';
+        }
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = 'Verification failed. Try again.';
+        statusEl.style.color = '#d32f2f';
+      }
+    }
+
+    function goBack() {
+      document.getElementById('otp-section').style.display = 'none';
+      document.getElementById('email-section').style.display = 'block';
+      document.getElementById('otp-input').value = '';
+      document.getElementById('otp-status').textContent = '';
+    }
+  </script>
+</body>
+
+</html>

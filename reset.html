@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  <title>Reset Password</title>
+  <link rel="stylesheet" href="common.css">
+</head>
+
+<body>
+  <div class="container">
+    <h2>Reset Password</h2>
+    <p>Enter your new password below.</p>
+    <form id="resetForm">
+      <input type="password" id="newPass" placeholder="New Password" required>
+      <input type="password" id="confirmPass" placeholder="Confirm Password" required>
+      <button type="submit">Update Password</button>
+    </form>
+    <p id="status"></p>
+  </div>
+
+  <!-- <script>
+    const form = document.getElementById("resetForm");
+    const statusText = document.getElementById("status");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const pass = document.getElementById("newPass").value;
+      const confirm = document.getElementById("confirmPass").value;
+
+      const strongPass = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+      if (pass !== confirm) {
+        statusText.innerText = "❌ Passwords do not match.";
+      } else if (!strongPass.test(pass)) {
+        statusText.innerText = "⚠️ Password must include uppercase, lowercase, number, symbol and 8+ chars.";
+      } else {
+        statusText.innerText = "✅ Password updated successfully!";
+      }
+    });
+  </script>
+
+  <script>
+    // Validation of new password - sagnik
+
+    const passwordInput = document.getElementById("newPass");
+    const confirmInput = document.getElementById("confirmPass");
+    
+  </script>
+</body>
+</html> -->
+
+
+  <script>
+    // new password logic validation and update it in the backend databse - sagnik 
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const userid = urlParams.get('userId');
+    if (!userid) {
+      alert("User ID is missing from URL");
+    }
+    console.log(userid);
+    const form = document.getElementById("resetForm");
+    const statusText = document.getElementById("status");
+
+
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const pass = document.getElementById("newPass").value;
+      const confirm = document.getElementById("confirmPass").value;
+
+      const strongPass = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+      if (pass !== confirm) {
+        statusText.innerText = "❌ Passwords do not match.";
+        statusText.style.color = "red";
+        return;
+      }
+
+      if (!strongPass.test(pass)) {
+        statusText.innerText = "⚠️ Password must include uppercase, lowercase, number, symbol and 8+ chars.";
+        statusText.style.color = "orange";
+        return;
+      }
+
+      // Send to backend
+      try {
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyCd9uDRng_yMuMzqLhqrPs3Quht_lekbF0",
+          authDomain: "medieye-8d798.firebaseapp.com",
+          databaseURL: "https://medieye-8d798-default-rtdb.asia-southeast1.firebasedatabase.app/",
+          projectId: "medieye-8d798",
+          storageBucket: "medieye-8d798.firebasestorage.app",
+          messagingSenderId: "967976625417",
+          appId: "1:967976625417:web:00eed975b183e6d1e91fd8"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        // const auth = firebase.auth();
+        const database = firebase.database();
+
+        await database.ref('users/' + userid).update({
+          pass: pass
+        });
+
+
+
+      } catch (error) {
+        console.error("Signup error:", error);
+        let msg = "Failed to create account.";
+        if (error.code === "auth/email-already-in-use") {
+          msg = "This email is already registered.";
+        } else if (error.code === "auth/weak-password") {
+          msg = "Password is too weak. Use at least 6 characters.";
+        }
+        alert(msg);
+      } finally {
+        window.location.href = "login.html";
+        // document.getElementById("loading-overlay").style.display = "none";
+      }
+    });
+  </script>
+</body>

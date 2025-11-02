@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Patient Medicine Tracker — Premium UI</title>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-1: #0f1724;
+      --bg-2: #0b1220;
+      --glass: rgba(255, 255, 255, 0.06);
+      --accentA: #00c6ff;
+      --accentB: #0072ff;
+      --success: #22c55e;
+      --muted: rgba(255, 255, 255, 0.6);
+      --danger: #ef4444;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(120deg, var(--bg-1), var(--bg-2));
+      color: #fff;
+      overflow-x: hidden; /* prevent horizontal scroll */
+    }
+
+    .wrap {
+      width: 95%;
+      max-width: 1150px;
+      margin: 36px auto;
+      padding: 24px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.02));
+      box-shadow: 0 12px 40px rgba(2, 6, 23, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all .3s ease;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      background: linear-gradient(90deg, var(--accentA), var(--accentB));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .title p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .logout-btn {
+      background: var(--danger);
+      border: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 10px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+    }
+
+    .logout-btn:hover {
+      background: #dc2626;
+      transform: scale(1.05);
+      box-shadow: 0 6px 18px rgba(239, 68, 68, 0.5);
+    }
+
+    .top-panel {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .info,
+    .progress-wrap,
+    .patient-card {
+      border-radius: 14px;
+      background: var(--glass);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 18px;
+      transition: all 0.3s ease;
+    }
+
+    .info:hover,
+    .progress-wrap:hover,
+    .patient-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .info h2 {
+      margin: 0 0 6px;
+      color: var(--accentB)
+    }
+
+    .info p {
+      margin: 6px 0;
+      color: var(--muted);
+      font-weight: 500
+    }
+
+    .patient-card {
+      flex: 0 0 250px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+    }
+
+    /* Overall progress bar moved up */
+    .overall-progress {
+      margin-bottom: 25px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accentA), var(--accentB));
+      border-radius: 999px;
+      transition: width 0.5s ease-in-out;
+    }
+
+    .progress-number {
+      display: block;
+      text-align: right;
+      font-size: 1.1rem;
+      margin-top: 6px;
+      color: var(--accentA);
+      font-weight: 600;
+    }
+
+    .days-grid {
+      margin-top: 6px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* ✅ bigger tiles */
+      gap: 22px;
+    }
+
+    .day-card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      transition: all .28s ease;
+    }
+
+    .day-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    }
+
+    .day-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px
+    }
+
+    .day-head h3 {
+      margin: 0;
+      font-size: 1.15rem;
+      color: var(--accentB)
+    }
+
+    .badge {
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: .85rem
+    }
+
+    .badge.pending {
+      background: rgba(255, 80, 80, 0.12);
+      color: #ff8b8b;
+      border: 1px solid rgba(255, 80, 80, 0.08)
+    }
+
+    .badge.success {
+      background: rgba(34, 197, 94, 0.12);
+      color: var(--success);
+      border: 1px solid rgba(34, 197, 94, 0.08)
+    }
+
+    .time-item {
+      flex: 1 1 calc(50% - 8px);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.02);
+    }
+
+    .time-item .lbl {
+      font-size: .95rem;
+      color: var(--muted)
+    }
+
+    .time-item input {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: var(--accentB)
+    }
+
+    .day-complete {
+      background: linear-gradient(180deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.05));
+      border-color: rgba(34, 197, 94, 0.2) !important;
+    }
+
+    .congrats {
+      text-align: center;
+      padding: 60px 30px;
+      border-radius: 20px;
+      background: linear-gradient(145deg, rgba(0, 198, 255, 0.15), rgba(34, 197, 94, 0.15));
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .congrats h2 {
+      font-size: 2rem;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, var(--accentA), var(--accentB));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95)
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1)
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="title">
+        <h1>MediEye — Medicine Tracker</h1>
+        <p>Personalized schedule • Track each dose • Secure & reliable</p>
+      </div>
+      <button id="logoutBtn" class="logout-btn">Logout</button>
+    </div>
+
+    <div class="top-panel">
+      <div class="info">
+        <h2 id="medicineTitle">Dolo 650</h2>
+        <p><strong>Disease:</strong> Fever</p>
+        <p><strong>Duration:</strong> <span id="durationDays">5</span> days</p>
+        <p><strong>Dosage:</strong> Morning · Afternoon · Evening · Night</p>
+      </div>
+
+      <div class="patient-card">
+        <div style="font-size:0.9rem;color:var(--muted)">Patient</div>
+        <h3 id="patientName">John Doe</h3>
+        <p>Age: 27</p>
+        <p>Email: john.doe@gmail.com</p>
+      </div>
+    </div>
+
+    <!-- ✅ Moved progress bar ABOVE -->
+    <div class="overall-progress">
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+      <span id="progressNumber" class="progress-number">0%</span>
+    </div>
+
+    <div id="daysGrid" class="days-grid"></div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCd9uDRng_yMuMzqLhqrPs3Quht_lekbF0",
+      authDomain: "medieye-8d798.firebaseapp.com",
+      databaseURL: "https://medieye-8d798-default-rtdb.asia-southeast1.firebasedatabase.app/",
+      projectId: "medieye-8d798",
+      storageBucket: "medieye-8d798.firebasestorage.app",
+      messagingSenderId: "967976625417",
+      appId: "1:967976625417:web:00eed975b183e6d1e91fd8"
+    };
+
+    let TOTAL_DAYS = 5;
+    const TIMES = ["Morning", "Afternoon", "Evening", "Night"];
+    let state = {};
+
+    async function loadData() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const userid = urlParams.get('userId');
+
+      if (!userid) {
+        alert("User ID is missing in URL.");
+        return;
+      }
+
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      const database = firebase.database();
+
+      const snapshot = await database.ref('patients/' + userid).once('value');
+      if (!snapshot.exists()) return alert("User doesn't exist.");
+
+      const userData = snapshot.val();
+
+      TOTAL_DAYS = parseInt(userData.days) || 5;
+      const completed = userData.completedDosages || {};
+
+      state = {};
+      for (let d = 1; d <= TOTAL_DAYS; d++) {
+        state[d] = { times: {} };
+        TIMES.forEach(t => {
+          state[d].times[t] = completed[`${d}-${t}`] || false;
+        });
+      }
+
+      renderUI();
+      updateOverall();
+    }
+
+    function renderUI() {
+      const daysGrid = document.getElementById('daysGrid');
+      daysGrid.innerHTML = '';
+      for (let d = 1; d <= TOTAL_DAYS; d++) daysGrid.appendChild(createDayCard(d));
+    }
+
+    function createDayCard(day) {
+      const card = document.createElement('div');
+      card.className = 'day-card';
+      card.dataset.day = day;
+      card.innerHTML = `
+        <div class="day-head">
+          <h3>Day ${day}</h3>
+          <span class="badge pending" id="badge-${day}">Pending</span>
+        </div>
+        <div class="times">${TIMES.map(t => `
+          <label class="time-item">
+            <input type="checkbox" data-day="${day}" data-time="${t}" ${state[day].times[t] ? "checked" : ""}>
+            <div class="lbl">${t}</div>
+          </label>`).join('')}
+        </div>
+        <div style="margin-top:12px">
+          <div class="progress-bar" style="height:8px;">
+            <div class="progress-fill" id="pf-${day}" style="width:${getDayProgressPercent(day)}%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+            <div style="font-size:.92rem;color:var(--muted)" id="pctText-${day}">${getDayProgressPercent(day)}% complete</div>
+            <div id="dayStatus-${day}" style="font-weight:700"></div>
+          </div>
+        </div>
+      `;
+      card.querySelectorAll('input').forEach(chk => chk.addEventListener('change', onCheckboxChange));
+      updateDayStatus(day);
+      return card;
+    }
+
+    function getDayProgressPercent(day) {
+      const times = state[day].times;
+      const checked = TIMES.filter(t => times[t]).length;
+      return Math.round((checked / TIMES.length) * 100);
+    }
+
+    function updateDayStatus(day) {
+      const pct = getDayProgressPercent(day);
+      const badge = document.getElementById(`badge-${day}`);
+      const card = document.querySelector(`.day-card[data-day="${day}"]`);
+      const dayStatus = document.getElementById(`dayStatus-${day}`);
+
+      if (pct === 100) {
+        badge.className = 'badge success';
+        badge.textContent = 'Success';
+        card.classList.add('day-complete');
+        dayStatus.textContent = '✅';
+      } else {
+        badge.className = 'badge pending';
+        badge.textContent = 'Pending';
+        card.classList.remove('day-complete');
+        dayStatus.textContent = '';
+      }
+    }
+
+    function onCheckboxChange(e) {
+      const day = +e.target.dataset.day;
+      const time = e.target.dataset.time;
+      state[day].times[time] = e.target.checked;
+      document.getElementById(`pf-${day}`).style.width = getDayProgressPercent(day) + '%';
+      document.getElementById(`pctText-${day}`).textContent = getDayProgressPercent(day) + '% complete';
+      updateDayStatus(day);
+      updateOverall();
+      saveToFirebase();
+    }
+
+    function updateOverall() {
+      let checked = 0, total = 0;
+      for (let d = 1; d <= TOTAL_DAYS; d++) TIMES.forEach(t => {
+        total++; if (state[d].times[t]) checked++;
+      });
+      const pct = total ? Math.round((checked / total) * 100) : 0;
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('progressNumber').textContent = pct + '%';
+      if (pct === 100) showCongrats();
+    }
+
+    function showCongrats() {
+      document.getElementById('daysGrid').innerHTML = `
+        <div class="congrats">
+          <h2>🎉 Congratulations!</h2>
+          <p>You've successfully completed your entire medication course.<br>Stay healthy & hydrated 💧</p>
+        </div>`;
+    }
+
+    async function saveToFirebase() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const userid = urlParams.get('userId');
+      if (!userid) return;
+      const completedDosages = {};
+      for (let d = 1; d <= TOTAL_DAYS; d++) TIMES.forEach(t => {
+        completedDosages[`${d}-${t}`] = state[d].times[t];
+      });
+      await firebase.database().ref('patients/' + userid).update({ completedDosages });
+    }
+
+    document.getElementById("logoutBtn")?.addEventListener("click", () => {
+      window.location.href = "index.html";
+    });
+
+    document.addEventListener('DOMContentLoaded', loadData);
+  </script>
+</body>
+
+</html>

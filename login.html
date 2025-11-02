@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediEye | Login</title>
+
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #3a0ca3, #7209b7, #4361ee);
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 25px;
+      left: 25px;
+      font-size: 22px;
+      color: white;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.3s;
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.35);
+      transform: scale(1.05);
+    }
+
+    .container {
+      display: flex;
+      width: 900px;
+      height: 500px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Left notice panel */
+    .info-section {
+      flex: 1;
+      background: linear-gradient(to bottom right, #4361ee, #7209b7);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .info-section h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    .info-section p {
+      font-size: 15px;
+      margin-bottom: 25px;
+      max-width: 320px;
+      line-height: 1.5;
+    }
+
+    .features {
+      text-align: left;
+      margin-top: 10px;
+    }
+
+    .features li {
+      margin: 8px 0;
+      list-style: none;
+      position: relative;
+      padding-left: 20px;
+    }
+
+    .features li::before {
+      content: "✔";
+      color: #aaffaa;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+
+    .social-icons {
+      margin-top: 20px;
+    }
+
+    .social-icons a {
+      margin: 0 8px;
+      font-size: 20px;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    /* Right form panel */
+    .form-section {
+      flex: 1;
+      background: #fff;
+      padding: 50px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .form-section h2 {
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .form-section input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+    }
+
+    /* 🔥 Enhanced Interactive Button */
+    .btn {
+      display: inline-block;
+      padding: 12px;
+      margin-top: 15px;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      color: #fff !important;
+      cursor: pointer;
+      background: linear-gradient(to right, #4361ee, #7209b7);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(67, 97, 238, 0.3);
+      font-size: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(67, 97, 238, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 3px 5px rgba(67, 97, 238, 0.3);
+    }
+
+    .form-footer {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .form-footer a {
+      color: #4361ee;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .extra-links {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+
+    .extra-links a {
+      color: #4361ee;
+      text-decoration: none;
+    }
+
+    .password-container {
+      position: relative;
+      width: 100%;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: #777;
+    }
+
+    .toggle-password:hover {
+      color: #333;
+    }
+  </style>
+</head>
+
+<body>
+  <button class="close-btn" id="closeBtn">✖</button>
+
+  <div class="container">
+    <!-- Left notice/info section -->
+    <div class="info-section">
+      <h2>Welcome Back to MediEye!</h2>
+      <p>MediEye helps doctors and hospitals manage patient data securely and efficiently with smart healthcare
+        dashboards.</p>
+      <ul class="features">
+        <li>Secure Patient Records</li>
+        <li>Real-Time Updates</li>
+        <li>Easy Access Anywhere</li>
+        <li>Smart Health Insights</li>
+      </ul>
+      <div class="social-icons">
+        <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
+        <a href="#"><ion-icon name="logo-google"></ion-icon></a>
+        <a href="#"><ion-icon name="logo-linkedin"></ion-icon></a>
+        <a href="#"><ion-icon name="logo-twitter"></ion-icon></a>
+      </div>
+    </div>
+
+    <!-- Right login form -->
+    <div class="form-section">
+      <h2>Sign In</h2>
+      <form id="loginForm">
+        <input type="text" id="userid" placeholder="Username" required />
+        <div class="password-container">
+          <input type="password" id="password" placeholder="Enter your password" required />
+          <button class="toggle-password" type="button" aria-label="Toggle password visibility">👁️</button>
+        </div>
+
+        <div class="extra-links">
+          <label style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="remember" />
+            <span>Remember me</span>
+          </label>
+          <a href="forgot.html">Forgot password?</a>
+        </div>
+
+        <!-- ✅ Fixed: No <a> inside button -->
+        <button type="submit" class="btn">Login</button>
+      </form>
+
+      <p class="form-footer">Don’t have an account? <a href="signup.html">Sign Up</a></p>
+    </div>
+  </div>
+
+  <script>
+    // 🔁 Toggle password visibility
+    const passwordInput = document.getElementById('password');
+    const toggleButton = document.querySelector('.toggle-password');
+
+    toggleButton.addEventListener('click', () => {
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      toggleButton.textContent = isPassword ? '👁️‍🗨️' : '👁️';
+    });
+
+    // ❌ Close button
+    document.getElementById('closeBtn').addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    // 🚀 Firebase Config (only once)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCd9uDRng_yMuMzqLhqrPs3Quht_lekbF0",
+      authDomain: "medieye-8d798.firebaseapp.com",
+      databaseURL: "https://medieye-8d798-default-rtdb.asia-southeast1.firebasedatabase.app/",
+      projectId: "medieye-8d798",
+      storageBucket: "medieye-8d798.firebasestorage.app",
+      messagingSenderId: "967976625417",
+      appId: "1:967976625417:web:00eed975b183e6d1e91fd8"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // 📝 Form submission
+    document.getElementById("loginForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const userid = document.getElementById("userid").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      if (!userid || !password) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      if (password.length < 6) {
+        alert("Password must be at least 6 characters long.");
+        return;
+      }
+
+      // Show loading state if desired (optional)
+      const btn = document.querySelector('.btn');
+      const originalText = btn.textContent;
+      btn.textContent = 'Logging in...';
+      btn.disabled = true;
+
+      database.ref('users/' + userid).once('value')
+        .then((snapshot) => {
+          btn.textContent = originalText;
+          btn.disabled = false;
+
+          if (!snapshot.exists()) {
+            alert("User doesn't exist.");
+            return;
+          }
+
+          const userData = snapshot.val();
+          if (userData.pass === password) {
+            // Redirect based on cam flag
+            if (userData.cam === 0) {
+              window.location.href = "dashboard.html";
+            } else {
+              window.location.href = "index.html";
+            }
+          } else {
+            alert("Wrong password.");
+          }
+        })
+        .catch((error) => {
+          console.error("Login error:", error);
+          btn.textContent = originalText;
+          btn.disabled = false;
+          alert("An error occurred. Please try again.");
+        });
+    });
+  </script>
+
+  <!-- Ionicons -->
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediEye | Dashboard</title>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      background: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo {
+      font-weight: bold;
+      font-size: 22px;
+      color: #4361ee;
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-links li a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .nav-links li a.active {
+      color: #4361ee;
+    }
+
+    .btn {
+      background: #4361ee;
+      color: #fff !important;
+      padding: 6px 12px;
+      border-radius: 5px;
+    }
+
+    .dashboard {
+      padding: 30px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+    }
+
+    /* Profile */
+    .profile-card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .profile-card img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 10px;
+    }
+
+    /* Table */
+    .table-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+
+    th {
+      background: #f9f9f9;
+    }
+
+    .status {
+      padding: 5px 10px;
+      border-radius: 6px;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .completed {
+      background: #2ecc71;
+    }
+
+    .progress {
+      background: #3498db;
+    }
+
+    .remaining {
+      background: #f39c12;
+    }
+
+    .not-started {
+      background: #e74c3c;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      width: 400px;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .modal-content label {
+      font-size: 14px;
+      font-weight: 600;
+      display: block;
+      margin-top: 10px;
+    }
+
+    .modal-content button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #4361ee;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .add-btn {
+      background: #4361ee;
+      color: #fff;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+
+    .status-circle {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: inline-block;
+      margin: 0 auto;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+
+    .status-circle.red {
+      background-color: #e63946;
+      /* Red */
+    }
+
+    .status-circle.green {
+      background-color: #06d6a0;
+      /* Green */
+    }
+
+    .status-circle:hover {
+      transform: scale(1.2);
+    }
+  </style>
+</head>
+
+<body onload="loadPatients()">
+  <script>
+    var totalPaientsValue = 0;
+    var totalDosageValue = 0;
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCd9uDRng_yMuMzqLhqrPs3Quht_lekbF0",
+      authDomain: "medieye-8d798.firebaseapp.com",
+      databaseURL: "https://medieye-8d798-default-rtdb.asia-southeast1.firebasedatabase.app/",
+      projectId: "medieye-8d798",
+      storageBucket: "medieye-8d798.firebasestorage.app",
+      messagingSenderId: "967976625417",
+      appId: "1:967976625417:web:00eed975b183e6d1e91fd8"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    function escapeHtml(text) {
+      if (typeof text !== 'string') return text;
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function loadPatients() {
+      const tbody = document.querySelector('#patientTable tbody');
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Loading...</td></tr>';
+
+      // 🔍 Read data from Firebase
+      database.ref('patients').once('value')
+        .then((snapshot) => {
+          tbody.innerHTML = ''; // Clear loading message
+          // console.log(snapshot);
+          if (!snapshot.exists()) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No patients found</td></tr>';
+            return;
+          }
+
+          const patients = snapshot.val();
+          let rowCount = 0;
+
+          // 🔁 Loop through all patients
+          for (const patientId in patients) {
+            const patient = patients[patientId];
+            const row = createPatientRow(patient, patientId);
+            tbody.appendChild(row);
+            rowCount++;
+          }
+
+          // Show empty state if no rows
+          if (rowCount === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No patients found</td></tr>';
+          }
+        })
+        .catch((error) => {
+          console.error('Error loading patients:', error);
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">Error: ${error.message}</td></tr>`;
+        });
+    }
+
+    // 🧩 Create table row for a patient
+    function createPatientRow(patient, patientId) {
+      const row = document.createElement('tr');
+      document.getElementById("totalPatients").innerHTML = ++totalPaientsValue;
+
+      // Calculate total dosages
+      const dosages = patient.dosages || {};
+      const totalDosages = (dosages.morning || 0) +
+        (dosages.afternoon || 0) +
+        (dosages.evening || 0) +
+        (dosages.night || 0);
+
+      const dosageDisplay = [
+        dosages.morning ? `M:${dosages.morning}` : '',
+        dosages.afternoon ? `A:${dosages.afternoon}` : '',
+        dosages.evening ? `E:${dosages.evening}` : '',
+        dosages.night ? `N:${dosages.night}` : ''
+      ].filter(Boolean).join(', ') || 'None';
+
+      const totalRequired = totalDosages * (patient.days || 0);
+      totalDosageValue = totalDosageValue + totalRequired;
+      document.getElementById("totalDosages").innerHTML = totalDosageValue;
+
+      // ✅ Determine status color
+      const completedDosages = patient.completedDosages || 0; // optional Firebase field
+      const isCompleted = completedDosages >= totalRequired;
+
+      const statusColor = isCompleted ? "green" : "red";
+      const statusText = isCompleted ? "Completed" : "Pending";
+
+      row.innerHTML = `
+    <td>${escapeHtml(patient.name || 'N/A')}</td>
+    <td>${patient.age || 'N/A'}</td>
+    <td>${patientId}</td>
+    <td>${patient.email}</td>
+    <td>${escapeHtml(patient.medicine || 'N/A')}</td>
+    <td>${dosageDisplay}</td>
+    <td>${patient.days || 'N/A'}</td>
+    <td>${totalRequired}</td>
+    <td>
+      <div class="status-circle ${statusColor}" title="${statusText}"></div>
+    </td>
+  `;
+      row.addEventListener("mouseenter", () => {
+        updateProfile(patient, patientId, dosageDisplay, totalRequired, statusColor);
+      });
+      return row;
+    }
+    function updateProfile(patient, id, dosageDisplay, totalRequired, statusColor) {
+      const card = document.querySelector(".profile-card"); // 👈 Better: use querySelector
+      if (!card) return; // Safety check
+
+      card.innerHTML = `
+    <h3>${escapeHtml(patient.name || 'N/A')}</h3>
+    <p><b>Patient ID:</b> ${id}</p>
+    <p><b>Age:</b> ${patient.age || 'N/A'}</p>
+    <p><b>Email:</b> ${patient.email || 'N/A'}</p>
+    <p><b>Medicine:</b> ${escapeHtml(patient.medicine || 'N/A')}</p>
+    <p><b>Dosages:</b> ${dosageDisplay}</p>
+    <p><b>Total Required:</b> ${totalRequired}</p>
+    <p><b>Status:</b> <span style="color:${statusColor}; font-weight:bold;">${statusColor === 'green' ? 'Completed' : 'Pending'}</span></p>
+  `;
+    }
+  </script>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">MediEye</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="dashboard.html" class="active">Dashboard</a></li>
+      <li><a href="login.html" class="btn">Logout</a></li>
+      <li><a href="index.html"></a></li>
+    </ul>
+  </nav>
+
+  <section class="dashboard">
+    <!-- Left side: stats + table -->
+    <div class="left-panel">
+      <h2>Welcome Back, Doctor 👋</h2>
+      <div class="dashboard-grid">
+        <div class="card">
+          <h3>Total Patients</h3>
+          <p id="totalPatients">0</p>
+        </div>
+        <div class="card">
+          <h3>Total Dosages</h3>
+          <p id="totalDosages">0</p>
+        </div>
+      </div>
+
+      <!-- Analytics Charts -->
+
+      <!-- Patient Table -->
+      <div class="table-container">
+        <button class="add-btn" onclick="window.location.href='add-patient.html'">+ Add Patient</button>
+        <table id="patientTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Phone number</th>
+              <th>Email</th>
+              <th>Medicine</th>
+              <th>Dosages/Day</th>
+              <th>Days</th>
+              <th>Total Dosages</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Right side: Profile -->
+    <div class="profile-card">
+      <!-- <img src="https://via.placeholder.com/100" alt="Patient Photo"> -->
+      <h3 id="profileName">Patient Name</h3>
+      <p id="profileInfo">Age: | Medicine: --</p>
+    </div>
+  </section>
+
+
+
+  <script>
+
+
+    function updateSummary() {
+      document.getElementById("totalPatients").textContent = patients.length;
+      document.getElementById("totalMedicines").textContent = [...new Set(patients.map(p => p.medicine))].length;
+      document.getElementById("totalDosages").textContent = patients.reduce((acc, p) => acc + p.totalDosages, 0);
+      document.getElementById("alerts").textContent = patients.filter(p => p.totalDosages > 3).length;
+    }
+
+
+
+    // Charts
+    
+  </script>
+</body>
+
+</html>

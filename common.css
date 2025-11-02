@@ -1,0 +1,122 @@
+/* ==== General Page Styling ==== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+  }
+  
+  body {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* ==== Glassmorphic Card ==== */
+  .container {
+    width: 380px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 35px 25px;
+    color: #fff;
+    text-align: center;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.8s ease;
+  }
+  
+  h2 {
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+  
+  p {
+    opacity: 0.85;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  
+  /* ==== Form Styling ==== */
+  input {
+    width: 100%;
+    padding: 12px 15px;
+    margin: 8px 0;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    font-size: 15px;
+  }
+  
+  input::placeholder {
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #2575fc, #6a11cb);
+    color: #fff;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+  }
+  
+  button:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+  
+  /* ==== OTP Boxes ==== */
+  .otp-inputs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .otp-inputs input {
+    width: 40px;
+    height: 45px;
+    text-align: center;
+    font-size: 18px;
+    border-radius: 10px;
+  }
+  
+  /* ==== Timer + Resend ==== */
+  .timer {
+    margin-top: 10px;
+    font-size: 14px;
+    opacity: 0.8;
+  }
+  
+  .resend-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 8px 16px;
+    border-radius: 25px;
+    margin-top: 10px;
+    transition: all 0.3s;
+  }
+  
+  .resend-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  /* ==== Animations ==== */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }

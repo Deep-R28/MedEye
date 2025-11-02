@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Profession | MediEye</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg1: #0f1724;
+      --bg2: #111827;
+      --accent1: #00c6ff;
+      --accent2: #0072ff;
+      --doctor: #4ade80;
+      --patient: #60a5fa;
+      --glass: rgba(255, 255, 255, 0.05);
+      --border: rgba(255, 255, 255, 0.1);
+      --muted: rgba(255, 255, 255, 0.8);
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      color: #fff;
+    }
+
+    .title {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .title h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+
+    .title p {
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+
+    .container {
+      width: 80%;
+      max-width: 1000px;
+      height: 480px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 40px;
+      transition: transform 0.4s ease;
+    }
+
+    .container:hover {
+      transform: scale(1.01);
+    }
+
+    .line {
+      width: 2px;
+      height: 80%;
+      background: linear-gradient(to bottom, var(--accent1), var(--accent2));
+      border-radius: 1px;
+      opacity: 0.7;
+    }
+
+    .button-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 20px;
+      transition: all 0.4s ease;
+      padding: 20px;
+    }
+
+    .button-card:hover {
+      transform: translateY(-6px);
+      background: rgba(255, 255, 255, 0.04);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .button-card img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.08);
+    }
+
+    .button-card.doctor:hover img {
+      border-color: var(--doctor);
+      box-shadow: 0 0 25px var(--doctor);
+    }
+
+    .button-card.patient:hover img {
+      border-color: var(--patient);
+      box-shadow: 0 0 25px var(--patient);
+    }
+
+    .button-card h2 {
+      margin: 15px 0 5px;
+      font-size: 1.5rem;
+    }
+
+    .button-card p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      text-align: center;
+      max-width: 250px;
+    }
+
+    .btn-glow {
+      margin-top: 15px;
+      padding: 10px 30px;
+      border: none;
+      border-radius: 999px;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(0, 198, 255, 0.3);
+    }
+
+    .btn-glow:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 35px rgba(0, 198, 255, 0.5);
+    }
+
+    .footer {
+      margin-top: 40px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .back-btn {
+      margin-top: 40px;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      background: linear-gradient(90deg, #ff3b3b, #ff6a6a);
+      color: #fff;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+    }
+
+    .back-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 35px rgba(255, 0, 0, 0.5);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="title">
+    <h1>Welcome to MediEye</h1>
+    <p>Select your profession to continue</p>
+  </div>
+
+  <div class="container">
+    <div class="button-card doctor" id="doctorBtn">
+      <img src="https://cdn-icons-png.flaticon.com/512/3774/3774299.png" alt="Doctor">
+      <h2>Doctor</h2>
+      <p>Access dashboards and monitor your patients efficiently.</p>
+      <button class="btn-glow">Enter as Doctor</button>
+    </div>
+
+    <div class="line"></div>
+
+    <div class="button-card patient" id="patientBtn">
+      <img src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png" alt="Patient">
+      <h2>Patient</h2>
+      <p>Track your medicines and stay updated with your treatments.</p>
+      <button class="btn-glow">Enter as Patient</button>
+    </div>
+  </div>
+
+  <button class="back-btn" onclick="window.location.href='index.html'">Go Back</button>
+
+  <div class="footer">© 2025 MediEye — Smart Healthcare Interface</div>
+
+  <script>
+    document.getElementById("doctorBtn").addEventListener("click", () => {
+      window.location.href = "login.html";
+    });
+
+    document.getElementById("patientBtn").addEventListener("click", () => {
+      window.location.href = "login_patient.html";
+    });
+  </script>
+</body>
+
+</html>

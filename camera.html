@@ -1,0 +1,305 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediEye | Capture Photo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top right, #7209b7, #3a0ca3, #4361ee);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #fff;
+    }
+
+    .camera-container {
+      width: 380px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 0.7s ease-in;
+    }
+
+    .camera-container h2 {
+      margin-bottom: 10px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .camera-container p {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .circle-frame {
+      position: relative;
+      width: 260px;
+      height: 260px;
+      margin: 25px auto;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+      background: #000;
+    }
+
+    video, canvas, img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    canvas, img {
+      display: none;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    button {
+      flex: 1;
+      min-width: 110px;
+      padding: 10px 0;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+      color: #fff;
+      background: linear-gradient(135deg, #4361ee, #7209b7);
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+
+    #uploadBtn {
+      background: linear-gradient(135deg, #06d6a0, #118ab2);
+    }
+
+    #retakeBtn {
+      background: linear-gradient(135deg, #ef476f, #d62828);
+    }
+
+    #status {
+      margin-top: 12px;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .or-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 18px 0 10px;
+      color: rgba(255,255,255,0.8);
+      font-weight: 600;
+      gap: 10px;
+    }
+
+    .or-divider::before,
+    .or-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.4);
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    label.upload-label {
+      display: inline-block;
+      background: linear-gradient(135deg, #06d6a0, #118ab2);
+      color: white;
+      padding: 10px 25px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    label.upload-label:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .camera-container {
+        width: 90%;
+        padding: 20px;
+      }
+      .circle-frame {
+        width: 220px;
+        height: 220px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="camera-container">
+    <h2>Capture Your Photo</h2>
+    <p>Allow access to your camera or upload a photo below.</p>
+
+    <div class="circle-frame">
+      <video id="camera" autoplay playsinline></video>
+      <canvas id="snapshot"></canvas>
+      <img id="preview" alt="Captured Photo" />
+    </div>
+
+    <div class="btn-group">
+      <button id="startBtn">Start Camera</button>
+      <button id="captureBtn" style="display:none;">Capture</button>
+      <button id="retakeBtn" style="display:none;">Retake</button>
+      <button id="uploadBtn" style="display:none;">Upload</button>
+    </div>
+
+    <div class="or-divider">OR</div>
+
+    <label for="fileInput" class="upload-label">Upload Image (JPG, JPEG, PNG)</label>
+    <input type="file" id="fileInput" accept="image/png, image/jpeg, image/jpg">
+
+    <div id="status"></div>
+  </div>
+
+  <script>
+    const video = document.getElementById("camera");
+    const canvas = document.getElementById("snapshot");
+    const preview = document.getElementById("preview");
+    const statusText = document.getElementById("status");
+
+    const startBtn = document.getElementById("startBtn");
+    const captureBtn = document.getElementById("captureBtn");
+    const retakeBtn = document.getElementById("retakeBtn");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const fileInput = document.getElementById("fileInput");
+
+    let stream = null;
+    let currentUserUID = null;
+
+    // Firebase Auth example (if using Firebase)
+    if (typeof firebase !== "undefined") {
+      firebase.auth().onAuthStateChanged(user => {
+        if (user) currentUserUID = user.uid;
+      });
+    }
+
+    // Start Camera
+    startBtn.addEventListener("click", async () => {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        startBtn.style.display = "none";
+        captureBtn.style.display = "inline-block";
+        statusText.innerText = "Camera started.";
+      } catch (err) {
+        statusText.innerText = "Camera access denied.";
+      }
+    });
+
+    // Capture Photo
+    captureBtn.addEventListener("click", () => {
+      const context = canvas.getContext("2d");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const dataURL = canvas.toDataURL("image/png");
+      stream.getTracks().forEach(track => track.stop());
+      video.style.display = "none";
+      captureBtn.style.display = "none";
+
+      preview.src = dataURL;
+      preview.style.display = "block";
+      retakeBtn.style.display = "inline-block";
+      uploadBtn.style.display = "inline-block";
+      statusText.innerText = "Preview ready. Retake or upload.";
+    });
+
+    // Retake
+    retakeBtn.addEventListener("click", () => {
+      preview.style.display = "none";
+      retakeBtn.style.display = "none";
+      uploadBtn.style.display = "none";
+      video.style.display = "block";
+      startBtn.style.display = "inline-block";
+      statusText.innerText = "";
+    });
+
+    // Upload to Firebase (optional)
+    uploadBtn.addEventListener("click", () => {
+      if (!currentUserUID) {
+        alert("Please log in first!");
+        return;
+      }
+
+      statusText.innerText = "Uploading...";
+      const storageRef = firebase.storage().ref(`patients/${currentUserUID}/profile_${Date.now()}.png`);
+
+      canvas.toBlob(blob => {
+        const uploadTask = storageRef.put(blob);
+        uploadTask.on("state_changed",
+          (snap) => {
+            const progress = (snap.bytesTransferred / snap.totalBytes) * 100;
+            statusText.innerText = `Uploading... ${progress.toFixed(0)}%`;
+          },
+          (err) => statusText.innerText = "Upload failed!",
+          () => {
+            uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
+              firebase.database().ref("patients/" + currentUserUID).update({ profilePhoto: downloadURL });
+              statusText.innerText = "✅ Upload successful!";
+            });
+          }
+        );
+      }, "image/png");
+    });
+
+    // Handle File Upload (JPG/PNG)
+    fileInput.addEventListener("change", function() {
+      const file = this.files[0];
+      if (file && file.type.match('image.*')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          preview.src = e.target.result;
+          preview.style.display = "block";
+          video.style.display = "none";
+          startBtn.style.display = "none";
+          captureBtn.style.display = "none";
+          retakeBtn.style.display = "inline-block";
+          uploadBtn.style.display = "inline-block";
+          statusText.innerText = "Image selected. Ready to upload.";
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert("Please upload a valid image (JPG, JPEG, or PNG).");
+      }
+    });
+  </script>
+</body>
+</html> -->
