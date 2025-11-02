@@ -1,70 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MediEye - Smart Medical Reminder</title>
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <title>MediEye — Smart Medical Reminder System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-light: #0f172a;
+      --accent: #00c6ff;
+      --accent2: #0072ff;
+      --text-light: #f1f5f9;
+      --glass: rgba(255,255,255,0.08);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(120deg, var(--bg-dark), var(--bg-light));
+      color: var(--text-light);
+      overflow-x: hidden;
+    }
+
+    /* Navbar */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 8%;
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    nav h1 {
+      font-size: 1.8rem;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .btn {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border: none;
+      color: white;
+      padding: 10px 28px;
+      font-size: 1rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: 600;
+    }
+
+    .btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 25px rgba(0, 198, 255, 0.6);
+    }
+
+    /* Hero */
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5rem 10%;
+      flex-wrap: wrap;
+    }
+
+    .hero-text {
+      flex: 1;
+      min-width: 320px;
+    }
+
+    .hero-text h2 {
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+      line-height: 1.3;
+    }
+
+    .hero-text p {
+      font-size: 1.1rem;
+      color: #cbd5e1;
+      margin-bottom: 2rem;
+      max-width: 500px;
+    }
+
+    .hero-img img {
+      width: 420px;
+      border-radius: 25px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    }
+
+    /* Sections */
+    section {
+      padding: 4rem 10%;
+      text-align: center;
+    }
+
+    section h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--accent);
+    }
+
+    section p {
+      max-width: 850px;
+      margin: 0 auto;
+      color: #d1d5db;
+      line-height: 1.7;
+      font-size: 1rem;
+    }
+
+    /* Features Grid */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .feature-card {
+      background: var(--glass);
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      transition: all 0.4s ease;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      background: rgba(255,255,255,0.1);
+    }
+
+    .feature-card h3 {
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    /* Footer */
+    footer {
+      background: rgba(255,255,255,0.05);
+      padding: 1.5rem;
+      text-align: center;
+      color: #9ca3af;
+      font-size: 0.9rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero {
+        flex-direction: column;
+        text-align: center;
+      }
+      .hero-img img {
+        width: 300px;
+        margin-top: 2rem;
+      }
+    }
+  </style>
 </head>
 
 <body>
-  <!-- Navbar -->
-  <nav class="navbar">
-    <div class="logo">MediEye</div>
-    <ul class="nav-links">
-      <!-- <li><a href="index.html">Home</a></li>
-      <li><a href="dashboard.html">Dashboard</a></li>
-      <li><a href="add-patient.html">Add Patient</a></li> -->
-      <li><a href="verify_profession.html" class="btn">Login</a></li>
-    </ul>
+  <nav>
+    <h1>MediEye</h1>
+    <button class="btn" onclick="window.location.href='verify_profession.html'">Login</button>
   </nav>
 
-  <!-- Hero Section -->
-  <header class="hero">
-    <div class="hero-content">
-      <h1>Smart Medical Reminders for patients who needs to monitor their medical record</h1>
-      <p>Never miss a dosage again! Add your patients, upload prescriptions, and set smart reminders.</p>
-      <a href="signup.html" class="btn btn-primary">Get Started</a>
+  <section class="hero">
+    <div class="hero-text">
+      <h2>Smart Medical Reminder System for Doctors and Patients</h2>
+      <p>
+        MediEye is a unified digital health solution connecting doctors and patients through real-time medical reminders, prescription tracking, and intelligent communication.
+      </p>
+      <button class="btn" onclick="window.location.href='verify_profession.html'">Get Started</button>
     </div>
     <div class="hero-img">
-      <img src="https://img.freepik.com/free-vector/healthcare-doctor-smartphone-app_74855-4567.jpg"
-        alt="Medical Reminder">
-    </div>
-  </header>
-
-  <!-- Features -->
-
-
-  <section class="rating">
-    <div class="star">
-      <h2>Rating</h2>
-      <span class="fa fa-star checked"></span>
-      <span class="fa fa-star checked"></span>
-      <span class="fa fa-star checked"></span>
-      <span class="fa fa-star"></span>
-      <span class="fa fa-star"></span>
-    </div>
-    <div class="cust">
-      100+ Happy Customers
+      <img src="https://cdn-icons-png.flaticon.com/512/6687/6687304.png" alt="MediEye illustration">
     </div>
   </section>
-  <section class="features">
-    <div class="feature-card">
-      <img src="alarm.jpg">
-      <p>Set reminders for morning, afternoon, evening, or custom times.</p>
-    </div>
-    <div class="feature-card">
-      <img src="patient.jpg">
-      <p>Add new or existing patients with full medical details.</p>
-    </div>
-    <div class="feature-card">
-      <img src="notification.jpg">
-      <p>Reminders with medicine photo to avoid confusion.</p>
+
+  <section>
+    <h2>About MediEye</h2>
+    <p>
+      MediEye bridges the communication gap between healthcare providers and patients by automating reminders, tracking medication adherence, and updating prescriptions digitally.  
+      It’s designed to simplify healthcare monitoring, reduce missed doses, and enhance patient outcomes through AI-powered alerts.
+    </p>
+  </section>
+
+  <section>
+    <h2>For Doctors</h2>
+    <div class="features">
+      <div class="feature-card">
+        <h3>🩺 Patient Progress Monitoring</h3>
+        <p>View each patient's medicine intake and adherence level in real-time.</p>
+      </div>
+      <div class="feature-card">
+        <h3>📅 Automated Scheduling</h3>
+        <p>Automatically update dosage schedules and reminders based on treatment plans.</p>
+      </div>
+      <div class="feature-card">
+        <h3>💬 Smart Alerts</h3>
+        <p>Receive alerts when patients miss doses or need prescription updates.</p>
+      </div>
+      <div class="feature-card">
+        <h3>📊 Health Analytics</h3>
+        <p>Access medication success reports and adherence analytics to improve decisions.</p>
+      </div>
     </div>
   </section>
+
+  <section>
+    <h2>For Patients</h2>
+    <div class="features">
+      <div class="feature-card">
+        <h3>⏰ Medication Reminders</h3>
+        <p>Get personalized alerts for every medicine, ensuring zero missed doses.</p>
+      </div>
+      <div class="feature-card">
+        <h3>📲 Prescription Access</h3>
+        <p>View and manage prescriptions digitally from your doctor anytime.</p>
+      </div>
+      <div class="feature-card">
+        <h3>📈 Progress Insights</h3>
+        <p>Track your treatment progress and receive motivational health updates.</p>
+      </div>
+      <div class="feature-card">
+        <h3>🔒 Secure Health Data</h3>
+        <p>Your health records and prescription details are stored safely and confidentially.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Our Impact</h2>
+    <p>
+      MediEye reduces prescription errors, improves adherence rates, and empowers both doctors and patients to collaborate digitally for a healthier tomorrow.
+    </p>
+  </section>
+
+  <footer>
+    © 2025 MediEye | Smart Medical Reminder System for Doctors & Patients
+  </footer>
 </body>
-
 </html>
